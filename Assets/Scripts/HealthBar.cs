@@ -8,6 +8,8 @@ public class HealthBar : MonoBehaviour
     [SerializeField] private Slider _slider;
     [SerializeField] private Health _health;
 
+    private Coroutine _coroutine;
+
     private void OnEnable()
     {
         _health.ValueChanged += OnValueChanged;
@@ -18,8 +20,24 @@ public class HealthBar : MonoBehaviour
     {
         _health.ValueChanged -= OnValueChanged;
     }
-    public void OnValueChanged(float value, float maxValue)
+
+    private void OnValueChanged(float value, float maxValue, float finalValue)
+{
+        if (_coroutine != null)
+            StopCoroutine(_coroutine);
+
+        _coroutine = StartCoroutine(ChangeValue(value, maxValue, finalValue));
+    }
+
+    private IEnumerator ChangeValue(float value, float maxValue, float finalValue)
     {
-        _slider.value = value / maxValue;
+        float deltaValue = 0.1f;
+
+        while (value != finalValue)
+        {
+            yield return null;
+            value = Mathf.MoveTowards(value, finalValue, deltaValue);
+            _slider.value = value / maxValue;
+        }
     }
 }
